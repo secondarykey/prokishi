@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+option go_package = "../api";
+package api;
+
+service ConnectionService {
+	rpc Connection(ConnectionRequest) returns (ConnectionResponse); 
+}
+
+message ConnectionRequest {
+	string code = 1;
+	string engineId = 2;
+}
+
+message ConnectionResponse {
+	string connectionId = 1;
+}
+
+service USISendService {
+	rpc Send(SendRequest) returns (SendResponse); 
+}
+
+message SendRequest {
+	string code = 1;
+	string connectionId = 2;
+    string cmd = 3;
+}
+
+message SendResponse {
+}
+
+service USIReceiveService {
+	rpc Receive(ReceiveRequest) returns (stream ReceiveResponse); 
+}
+
+message ReceiveRequest {
+	string code = 1;
+	string connectionId = 2;
+}
+
+message ReceiveResponse {
+	string cmd = 1;
+	string error = 2;
+}
