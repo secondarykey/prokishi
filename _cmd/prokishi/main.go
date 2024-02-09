@@ -48,7 +48,7 @@ func run() error {
 	if len(args) >= 1 {
 		sub := args[0]
 		if sub == "version" {
-			fmt.Println("prokishi version:%s", version)
+			fmt.Println("prokishi version:", version)
 			return nil
 		}
 	}
