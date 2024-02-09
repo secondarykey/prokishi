@@ -84,6 +84,8 @@ func command(args []string) error {
 	sub := args[0]
 
 	switch sub {
+	case "version":
+		fmt.Println("prokishi-server version:", version)
 	case "engine":
 		if len(args) >= 2 {
 			err = commandEngine(args[1:])

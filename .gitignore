@@ -1,3 +1,6 @@
+
 .*
 *.log
+*.exe
 _cmd/prokishi-server/db
+_cmd/build

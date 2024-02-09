@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log/slog"
 	"os"
@@ -31,8 +32,8 @@ func init() {
 }
 
 func main() {
-
-	err = run()
+	flag.Parse()
+	err := run()
 	if err != nil {
 		msg := fmt.Sprintf("%+v", err)
 		slog.Error(msg)
@@ -43,6 +44,15 @@ func main() {
 
 func run() error {
 
+	args := flag.Args()
+	if len(args) >= 1 {
+		sub := args[0]
+		if sub == "version" {
+			fmt.Println("prokishi version:%s", version)
+			return nil
+		}
+	}
+
 	err := loadIniFile()
 	if err != nil {
 		return xerrors.Errorf("loadIniFile() error: %w", err)
@@ -51,7 +61,7 @@ func run() error {
 	lv := parseLogLevel(iniFile.Level)
 	defer prokishi.SetLogFile(lv, "prokishi", version == "").Close()
 
-	err := prokishi.Run(iniFile.Host,
+	err = prokishi.Run(iniFile.Host,
 		iniFile.Port,
 		prokishi.Code(iniFile.Code),
 		prokishi.Engine(iniFile.EngineId),
