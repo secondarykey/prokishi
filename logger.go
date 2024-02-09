@@ -11,6 +11,8 @@ import (
 	"golang.org/x/xerrors"
 )
 
+// 開発時は作業ディレクトリ、
+// リリース動作の場合は実行しているパスを取得
 func GetRunDir(d bool) (string, error) {
 	dir, err := os.Getwd()
 	if err != nil {

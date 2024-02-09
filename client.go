@@ -26,6 +26,8 @@ type Client struct {
 	connectionId string
 }
 
+// クライアントの生成
+// サーバと接続を行い、UI側との連携を生成
 func NewClient(ctx context.Context, conf *Config, quit chan os.Signal) (*Client, error) {
 
 	var cli Client
@@ -43,13 +45,13 @@ func NewClient(ctx context.Context, conf *Config, quit chan os.Signal) (*Client,
 		return nil, xerrors.Errorf("connect() error: %w", err)
 	}
 
-	//USIレシーバーはコネクトに関係なく開始
 	cli.recvUSI = usi.NewReceiver(os.Stdout, os.Stdin)
 	go cli.receiveUSI(conf)
 
 	return &cli, nil
 }
 
+// サーバとの接続
 func (cli *Client) dial(host string, port int) error {
 
 	addr := net.JoinHostPort(host, strconv.Itoa(port))
@@ -66,6 +68,7 @@ func (cli *Client) dial(host string, port int) error {
 	return nil
 }
 
+// 連携用の接続
 func (cli *Client) connect(c *Config) error {
 
 	connCli := api.NewConnectionServiceClient(cli.conn)
@@ -74,31 +77,34 @@ func (cli *Client) connect(c *Config) error {
 		EngineId: c.EngineId,
 	}
 
+	//サーバからコネクションIDを取得
 	res, err := connCli.Connection(cli.ctx, req)
 	if err != nil {
 		return xerrors.Errorf("api.Connection() error: %w", err)
 	}
 
 	cli.connectionId = res.ConnectionId
-
 	recvReq := &api.ReceiveRequest{
 		Code:         c.Code,
 		ConnectionId: cli.connectionId,
 	}
 
+	//サーバ受信用のストリームを生成
 	recvCli := api.NewUSIReceiveServiceClient(cli.conn)
 	stream, err := recvCli.Receive(cli.ctx, recvReq)
 	if err != nil {
 		return xerrors.Errorf("api.Receive() error: %w", err)
 	}
-
+	//サーバの監視
 	go cli.receiveServer(stream, c.Version)
 
+	//送信用のクライアントを生成
 	cli.senderCli = api.NewUSISendServiceClient(cli.conn)
 
 	return nil
 }
 
+// 接続しているかを確認
 func (cli *Client) isConnect() bool {
 	if cli.connectionId == "" {
 		return false
@@ -106,14 +112,15 @@ func (cli *Client) isConnect() bool {
 	return true
 }
 
+// 接続を切る
 func (cli *Client) disconnect() {
 	cli.conn.Close()
 	cli.connectionId = ""
 	return
 }
 
+// USIから来た出力をサーバ側に送信
 func (cli *Client) receiveUSI(conf *Config) {
-
 	for in := range cli.recvUSI.InCh {
 		err := cli.sendServer(conf, in)
 		if err != nil {
@@ -122,6 +129,7 @@ func (cli *Client) receiveUSI(conf *Config) {
 	}
 }
 
+// 終了をサーバに送信
 func (cli *Client) sendQuit() {
 	if cli.senderCli == nil {
 		return
@@ -129,6 +137,7 @@ func (cli *Client) sendQuit() {
 	cli.sendServer(getConfig(), "quit")
 }
 
+// サーバに送信を行う
 func (cli *Client) sendServer(conf *Config, cmd string) error {
 
 	quit := false
@@ -159,6 +168,8 @@ func (cli *Client) sendServer(conf *Config, cmd string) error {
 	return nil
 }
 
+// サーバから受信を行い、標準出力を行う
+// id name,id authorに関しては編集を行う
 func (cli *Client) receiveServer(stream api.USIReceiveService_ReceiveClient, v string) {
 	for {
 

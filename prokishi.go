@@ -9,6 +9,7 @@ import (
 	"golang.org/x/xerrors"
 )
 
+// クライアントを生成し、USIとサーバの連携を行う
 func Run(host string, port int, opts ...Option) error {
 
 	conf := getDefaultConfig(host, port)
