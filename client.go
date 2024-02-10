@@ -10,6 +10,7 @@ import (
 	"prokishi/usi"
 	"strconv"
 	"strings"
+	"time"
 
 	"golang.org/x/xerrors"
 	"google.golang.org/grpc"
@@ -58,6 +59,7 @@ func (cli *Client) dial(host string, port int) error {
 	conn, err := grpc.Dial(
 		addr,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithTimeout(3*time.Second),
 		grpc.WithBlock(),
 	)
 	if err != nil {

@@ -22,7 +22,7 @@ func (s *Server) Connection(ctx context.Context, r *api.ConnectionRequest) (*api
 	//EngineIDがOKかを確認
 	id, err := s.startEngine(r.EngineId)
 	if err != nil {
-		return nil, fmt.Errorf("can not be verified")
+		return nil, xerrors.Errorf("startEngine() error: %w", err)
 	}
 
 	var res api.ConnectionResponse

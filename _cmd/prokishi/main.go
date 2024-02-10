@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"flag"
 	"fmt"
 	"log/slog"
@@ -44,6 +45,8 @@ func main() {
 
 func run() error {
 
+	dev := version == ""
+
 	args := flag.Args()
 	if len(args) >= 1 {
 		sub := args[0]
@@ -59,7 +62,7 @@ func run() error {
 	}
 
 	lv := parseLogLevel(iniFile.Level)
-	defer prokishi.SetLogFile(lv, "prokishi", version == "").Close()
+	defer prokishi.SetLogFile(lv, "prokishi", dev).Close()
 
 	err = prokishi.Run(iniFile.Host,
 		iniFile.Port,
@@ -99,7 +102,18 @@ func loadIniFile() error {
 
 	p := filepath.Join(dir, iniFileName)
 	if _, err := os.Stat(p); err != nil {
-		return fmt.Errorf("%s が存在しません", p)
+		fmt.Printf("%s not exists,\ncreat?[Y/n]:", p)
+		cmd := bufio.NewScanner(os.Stdin)
+		cmd.Scan()
+		if isYes(cmd.Text()) {
+			err := createIniFile(p)
+			if err != nil {
+				return fmt.Errorf("createInitFile error: %w", err)
+			}
+
+		} else {
+			return fmt.Errorf("%s が存在しません", p)
+		}
 	}
 	_, err = toml.DecodeFile(p, &iniFile)
 	if err != nil {
@@ -107,4 +121,34 @@ func loadIniFile() error {
 	}
 
 	return nil
+}
+
+func createIniFile(p string) error {
+
+	fp, err := os.Create(p)
+	if err != nil {
+		return xerrors.Errorf("os.Create() error: %w", err)
+	}
+	defer fp.Close()
+
+	var f IniFile
+	f.Host = "localhost"
+	f.Port = 8080
+	f.Code = ""
+	f.EngineId = ""
+	f.Level = "warn"
+
+	err = toml.NewEncoder(fp).Encode(&f)
+	if err != nil {
+		return xerrors.Errorf("toml.Encode() error: %w", err)
+	}
+	return nil
+}
+
+func isYes(cmd string) bool {
+	v := strings.ToLower(cmd)
+	if v == "" || v == "y" {
+		return true
+	}
+	return false
 }

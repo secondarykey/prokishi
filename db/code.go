@@ -12,6 +12,7 @@ import (
 
 const CodesColumns = "code,created_date,updated_date"
 const CodesSelect = "SELECT code,DATETIME(created_date),DATETIME(updated_date) FROM codes"
+const CodesCount = "SELECT COUNT(code) FROM codes"
 
 type Code struct {
 	Code    string
@@ -29,6 +30,20 @@ func createCode(row scanner) (*Code, error) {
 		return nil, xerrors.Errorf("Scan() error: %w", err)
 	}
 	return &c, nil
+}
+
+func CountCodes(ctx context.Context) (int, error) {
+	row, err := getRow(ctx, CodesCount)
+	if err != nil {
+		return -1, xerrors.Errorf("getRow(count code) error: %w", err)
+	}
+
+	num := 0
+	err = row.Scan(&num)
+	if err != nil {
+		return -1, xerrors.Errorf("Scan() error: %w", err)
+	}
+	return num, nil
 }
 
 func SelectCode(ctx context.Context, code string) (*Code, error) {

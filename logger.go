@@ -29,6 +29,17 @@ func GetRunDir(d bool) (string, error) {
 	return dir, nil
 }
 
+func createLvLogger(lv slog.Level, w io.Writer) *slog.Logger {
+	var opts slog.HandlerOptions
+	opts.Level = lv
+	h := slog.NewTextHandler(w, &opts)
+	return slog.New(h)
+}
+
+func SetLog(lv slog.Level, w io.Writer) {
+	slog.SetDefault(createLvLogger(lv, w))
+}
+
 func SetLogFile(lv slog.Level, name string, d bool) io.Closer {
 
 	dir, err := GetRunDir(d)
@@ -39,19 +50,13 @@ func SetLogFile(lv slog.Level, name string, d bool) io.Closer {
 
 	//削除したりの運用面倒そうだから同じ名前にする
 	fn := filepath.Join(dir, fmt.Sprintf("%s.log", name))
-
 	fp, err := os.Create(fn)
 	if err != nil {
 		slog.Error(err.Error())
 		return nil
 	}
 
-	var opts slog.HandlerOptions
-	opts.Level = lv
-
-	h := slog.NewTextHandler(fp, &opts)
-	slog.SetDefault(slog.New(h))
-
+	slog.SetDefault(createLvLogger(lv, fp))
 	return fp
 }
 

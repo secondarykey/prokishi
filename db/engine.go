@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"os"
 	"time"
 
 	"golang.org/x/xerrors"
@@ -38,6 +39,7 @@ func SelectEngine(ctx context.Context, id string) (*Engine, error) {
 	if err != nil {
 		return nil, xerrors.Errorf("getRow(engine) error: %w", err)
 	}
+
 	if row != nil {
 		return createEngine(row)
 	}
@@ -64,6 +66,11 @@ func FindEngines(ctx context.Context) ([]*Engine, error) {
 }
 
 func InsertEngine(id string, path string) error {
+
+	if _, err := os.Stat(path); err != nil {
+		return xerrors.Errorf("os.Stat() error: %w", err)
+	}
+
 	now := time.Now()
 	s := fmt.Sprintf("INSERT INTO engines (%s) VALUES (?,?,?,?)", EnginesColumns)
 	err := run(s, id, path, now, now)
