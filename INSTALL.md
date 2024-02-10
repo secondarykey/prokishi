@@ -8,7 +8,12 @@ prokishi エンジンは prokishi-server が起動してないと動作しない
 ## サーバ準備
 
 prokishi-server を準備します。
+実際のサーバにしたい端末で実行してください。
+
+動作自体を確認してみたい方は、同じ端末でも構いません。
 起動を行うとexeがある位置にdbディレクトリが作成されます。
+
+※UIをv0.2.0で作成予定ですので、コマンドなどがわからない方はもう少々お待ちください。
 
 ### エンジンの登録
 
@@ -119,30 +124,29 @@ listen tcp :8080: bind: Only one usage of each socket address (protocol/network 
 ## クライアントの設定
 
 クライアントの設定ファイルを設定します。
-
-エンジンのexe(prokishi.exe)をおいたディレクトリにprokishi.iniを作成します。
+初回実行時にエンジンのexe(prokishi.exe)をおいたディレクトリにprokishi.iniを作成します。
+※ご自身で作成されたprokishi.iniでも動作します。
 
 ```
-host="localhost" <- サーバを起動しているアドレス
-port=8080 <- 指定したポート番号(デフォルトで8080)
-code="server code" <- 認証コードを発行した場合に指定
-engineId="engine id" <- エンジンを設定したID
-logLevel="warn" <- debugとするとUSIのやり取りまですべて記録します。
+host = "localhost" <- サーバを起動しているアドレス
+port = 8080 <- 指定したポート番号(デフォルトで8080)
+code = "" <- 認証コードを発行した場合に指定
+engineId = "" <- エンジンを設定したID
+logLevel = "warn" <- debugとするとUSIのやり取りまですべて記録します。
 ```
 
 これらを設定して起動するとサーバ上での実行が可能になります。
 ※ポート以外の設定値は必ず""でくくってください。
 
+起動が成功した場合、そのコンソールで"usi"と入力を行うと、サーバのエンジンが動作していることがわかります。
+
 ## サーバが起動してないなどのエラー
 
-サーバの名称が間違ってる、サーバが起動してない場合は以下のエラーがでます。
+サーバの名称が間違ってる、サーバが起動してない場合は以下の文字列が含まれたエラーが表示されます。
 
 ```
-    prokishi.(*Client).dial
-        D:/Go/Projects/prokishi/client.go:66
   - context deadline exceeded
 ```
-
 
 ## 複数のエンジンを動作させる場合
 
